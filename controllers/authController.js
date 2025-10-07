@@ -19,6 +19,11 @@ exports.registerWatchUser = async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // If role is missing or invalid, default to 'customer'
+    if (!role || !['admin', 'customer'].includes(role)) {
+      role = 'customer';
+    }
+
     const user = await WatchUser.create({
       name,
       email,
