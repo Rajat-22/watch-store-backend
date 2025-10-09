@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { registerWatchUser, loginWatchUser } = require('../controllers/authController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -24,5 +25,15 @@ router.post(
   ],
   loginWatchUser
 );
+
+// example protected route
+router.get('/all', protect, (req, res) => {
+  res.json({ message: `Hello ${req.user.name}, your role is ${req.user.role}` });
+});
+
+// admin only
+router.get('/admin-test', protect, admin, (req, res) => {
+  res.json({ message: 'Welcome admin!' });
+});
 
 module.exports = router;
