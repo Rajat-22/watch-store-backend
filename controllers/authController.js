@@ -11,17 +11,17 @@ exports.registerWatchUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
+
+  // Set role to customer if not provided
+  const role = (req.body.role && ['admin', 'customer'].includes(req.body.role))
+    ? req.body.role
+    : 'customer';
 
   try {
     const existingUser = await WatchUser.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
-    }
-
-    // If role is missing or invalid, default to 'customer'
-    if (!role || !['admin', 'customer'].includes(role)) {
-      role = 'customer';
     }
 
     const user = await WatchUser.create({
