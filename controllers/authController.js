@@ -36,7 +36,7 @@ exports.registerWatchUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id, user.role),
+      token: generateToken(user._id, user.role, user.name, user.email),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -65,7 +65,7 @@ exports.loginWatchUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id, user.role),
+      token: generateToken(user._id, user.role, user.name, user.email),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
