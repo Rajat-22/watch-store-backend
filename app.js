@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const watchProductRoutes = require('./routes/watchProductRoutes');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/watch-products', watchProductRoutes);
 
 app.get('/', (req, res) => {
   res.send('Watch Store Backend is Running!');
