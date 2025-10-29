@@ -13,9 +13,6 @@ exports.getAllProducts = async (req, res) => {
 // CREATE new product (admin)
 exports.createProduct = async (req, res) => {
   try {
-    console.log("Incoming Body:", req.body);
-    console.log("Incoming Files:", req.files);
-
     const { name, description, price, salePrice, tags, bestseller, categories } = req.body;
 
     let images = [];
@@ -42,11 +39,22 @@ exports.createProduct = async (req, res) => {
       images,
     });
 
-    console.log("Product Created Successfully:", product);
-
     res.status(201).json(product);
   } catch (error) {
     console.error("❌ Error creating product:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GETPRODUCT by ID
+exports.getProductById = async (req, res) => {
+  try {
+    const product = await WatchProduct.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.status(200).json(product);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
@@ -64,9 +72,23 @@ exports.updateProduct = async (req, res) => {
     if (description) product.description = description;
     if (price) product.price = price;
     if (salePrice) product.salePrice = salePrice;
-    if (tags) product.tags = tags.split(',');
-    if (categories) product.categories = categories.split(',');
     if (bestseller !== undefined) product.bestseller = bestseller;
+
+    if (tags) {
+      product.tags = Array.isArray(tags)
+        ? tags
+        : typeof tags === 'string'
+        ? tags.split(',').map(t => t.trim())
+        : [];
+    }
+
+    if (categories) {
+      product.categories = Array.isArray(categories)
+        ? categories
+        : typeof categories === 'string'
+        ? categories.split(',').map(c => c.trim())
+        : [];
+    }
 
     if (req.files && req.files.length > 0) {
       product.images = req.files.map(file => file.path);
@@ -75,6 +97,7 @@ exports.updateProduct = async (req, res) => {
     await product.save();
     res.json(product);
   } catch (error) {
+    console.error('❌ Error updating product:', error);
     res.status(500).json({ message: error.message });
   }
 };
