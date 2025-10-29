@@ -13,12 +13,14 @@ exports.getAllProducts = async (req, res) => {
 // CREATE new product (admin)
 exports.createProduct = async (req, res) => {
   try {
+    console.log("Incoming Body:", req.body);
+    console.log("Incoming Files:", req.files);
+
     const { name, description, price, salePrice, tags, bestseller, categories } = req.body;
 
-    // Handle multiple images
     let images = [];
-    if (req.files) {
-      images = req.files.map(file => file.path); // Cloudinary URLs
+    if (req.files && Array.isArray(req.files)) {
+      images = req.files.map(file => file.path); // Cloudinary URLs or local paths
     }
 
     const product = await WatchProduct.create({
@@ -26,17 +28,29 @@ exports.createProduct = async (req, res) => {
       description,
       price,
       salePrice,
-      tags: tags ? tags.split(',') : [],
+     tags: Array.isArray(tags)
+        ? tags
+        : typeof tags === 'string'
+        ? tags.split(',').map(t => t.trim())
+        : [],
       bestseller: bestseller || false,
-      categories: categories ? categories.split(',') : [],
+      categories: Array.isArray(categories)
+        ? categories
+        : typeof categories === 'string'
+        ? categories.split(',').map(c => c.trim())
+        : [],
       images,
     });
 
+    console.log("Product Created Successfully:", product);
+
     res.status(201).json(product);
   } catch (error) {
+    console.error("❌ Error creating product:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // UPDATE product (admin)
 exports.updateProduct = async (req, res) => {
