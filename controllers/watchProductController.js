@@ -13,7 +13,7 @@ exports.getAllProducts = async (req, res) => {
 // CREATE new product (admin)
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, salePrice, tags, bestseller, categories } = req.body;
+    const { name, description, price, salePrice, tags, isBestSeller, category } = req.body;
 
     let images = [];
     if (req.files && Array.isArray(req.files)) {
@@ -30,11 +30,11 @@ exports.createProduct = async (req, res) => {
         : typeof tags === 'string'
         ? tags.split(',').map(t => t.trim())
         : [],
-      bestseller: bestseller || false,
-      categories: Array.isArray(categories)
-        ? categories
-        : typeof categories === 'string'
-        ? categories.split(',').map(c => c.trim())
+      isBestSeller: isBestSeller || false,
+      category: Array.isArray(category)
+        ? category
+        : typeof category === 'string'
+        ? category.split(',').map(c => c.trim())
         : [],
       images,
     });
@@ -66,13 +66,13 @@ exports.updateProduct = async (req, res) => {
     const product = await WatchProduct.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    const { name, description, price, salePrice, tags, bestseller, categories } = req.body;
+    const { name, description, price, salePrice, tags, isBestSeller, category } = req.body;
 
     if (name) product.name = name;
     if (description) product.description = description;
     if (price) product.price = price;
     if (salePrice) product.salePrice = salePrice;
-    if (bestseller !== undefined) product.bestseller = bestseller;
+    if (isBestSeller !== undefined) product.isBestSeller = isBestSeller;
 
     if (tags) {
       product.tags = Array.isArray(tags)
@@ -82,11 +82,11 @@ exports.updateProduct = async (req, res) => {
         : [];
     }
 
-    if (categories) {
-      product.categories = Array.isArray(categories)
-        ? categories
-        : typeof categories === 'string'
-        ? categories.split(',').map(c => c.trim())
+    if (category) {
+      product.category = Array.isArray(category)
+        ? category
+        : typeof category === 'string'
+        ? category.split(',').map(c => c.trim())
         : [];
     }
 
