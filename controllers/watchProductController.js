@@ -14,10 +14,14 @@ exports.getAllProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, salePrice, tags, isBestSeller, category } = req.body;
+    console.log('req.file:', req.file);
 
-    let images = [];
-    if (req.files && Array.isArray(req.files)) {
-      images = req.files.map(file => file.path); // Cloudinary URLs or local paths
+    let image = '';
+    if (req.file) {
+      image = req.file.path; // If using multer.single()
+    } 
+    else if (req.files && req.files.length > 0) {
+      image = req.files[0].path; // If still using .array()
     }
 
     const product = await WatchProduct.create({
@@ -31,12 +35,8 @@ exports.createProduct = async (req, res) => {
         ? tags.split(',').map(t => t.trim())
         : [],
       isBestSeller: isBestSeller || false,
-      category: Array.isArray(category)
-        ? category
-        : typeof category === 'string'
-        ? category.split(',').map(c => c.trim())
-        : [],
-      images,
+      category,
+      image,
     });
 
     res.status(201).json(product);
@@ -73,6 +73,7 @@ exports.updateProduct = async (req, res) => {
     if (price) product.price = price;
     if (salePrice) product.salePrice = salePrice;
     if (isBestSeller !== undefined) product.isBestSeller = isBestSeller;
+    if (category) product.category = category;
 
     if (tags) {
       product.tags = Array.isArray(tags)
@@ -82,16 +83,10 @@ exports.updateProduct = async (req, res) => {
         : [];
     }
 
-    if (category) {
-      product.category = Array.isArray(category)
-        ? category
-        : typeof category === 'string'
-        ? category.split(',').map(c => c.trim())
-        : [];
-    }
-
-    if (req.files && req.files.length > 0) {
-      product.images = req.files.map(file => file.path);
+    if (req.file) {
+      product.image = req.file.path; // multer.single('image')
+    } else if (req.files && req.files.length > 0) {
+      product.image = req.files[0].path;
     }
 
     await product.save();
