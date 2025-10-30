@@ -16,8 +16,17 @@ const watchProductSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  category: [String], // array of categories like ['digital', 'analog']
-  images: [String], // array of image URLs (Cloudinary)
+  // ✅ Single category (string)
+    category: {
+      type: String,
+      required: true,
+    },
+
+    // ✅ Single image (string URL)
+    image: {
+      type: String,
+      required: false,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('WatchProduct', watchProductSchema);
